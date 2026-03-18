@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Völund Workshop">
+<title>Völund Watches — Workshop Build List</title>
+
+<!-- Inline manifest as data URI for single-file PWA -->
+<link rel="manifest" id="manifest-placeholder">
+
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --black: #0a0a0a;
+    --dark: #111111;
+    --card: #161616;
+    --card2: #1c1c1c;
+    --border: #2a2a2a;
+    --silver: #c8c8c8;
+    --silver-dim: #888888;
+    --gold: #b8952a;
+    --gold-dim: #7a6018;
+    --gold-faint: rgba(184,149,42,0.08);
+    --white: #f0ede8;
+    --green: #4a8c4a;
+    --green-dim: rgba(74,140,74,0.15);
+    --red-dim: rgba(139,32,32,0.2);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+  body {
+    background: var(--black);
+    color: var(--silver);
+    font-family: 'EB Garamond', serif;
+    font-size: 16px;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  body::before {
+    content:'';
+    position:fixed; inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events:none; z-index:100; opacity:0.35;
+  }
+
+  .page { max-width:860px; margin:0 auto; padding:48px 20px 80px; }
+
+  /* HEADER */
+  header { text-align:center; margin-bottom:48px; }
+  .brand { font-family:'Cinzel Decorative',serif; font-size:clamp(20px,5vw,34px); color:var(--white); letter-spacing:0.18em; }
+  .divider { display:flex; align-items:center; gap:14px; margin:14px auto; max-width:380px; }
+  .divider-line { flex:1; height:1px; background:linear-gradient(90deg,transparent,var(--gold-dim),transparent); }
+  .divider-rune { color:var(--gold); font-size:16px; letter-spacing:4px; }
+  .subtitle { font-family:'Cinzel',serif; font-size:10px; letter-spacing:0.35em; color:var(--silver-dim); text-transform:uppercase; }
+
+  /* PROGRESS BAR */
+  .progress-wrap { margin-bottom:40px; }
+  .progress-label { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px; }
+  .progress-text { font-family:'Cinzel',serif; font-size:10px; letter-spacing:0.25em; color:var(--silver-dim); text-transform:uppercase; }
+  .progress-pct { font-family:'Cinzel',serif; font-size:13px; color:var(--gold); }
+  .progress-bar-bg { height:3px; background:var(--border); border-radius:2px; overflow:hidden; }
+  .progress-bar-fill { height:100%; background:linear-gradient(90deg,var(--gold-dim),var(--gold)); border-radius:2px; transition:width 0.4s ease; }
+
+  /* LEGEND */
+  .legend { display:flex; gap:16px; flex-wrap:wrap; justify-content:center; margin-bottom:40px; }
+  .legend-item { display:flex; align-items:center; gap:7px; font-family:'Cinzel',serif; font-size:9px; letter-spacing:0.2em; color:var(--silver-dim); text-transform:uppercase; }
+  .legend-dot { width:8px; height:8px; border-radius:1px; flex-shrink:0; }
+
+  /* PHASE */
+  .phase { margin-bottom:44px; animation:fadeUp 0.5s ease both; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+  .phase:nth-child(1){animation-delay:.05s} .phase:nth-child(2){animation-delay:.1s}
+  .phase:nth-child(3){animation-delay:.15s} .phase:nth-child(4){animation-delay:.2s}
+  .phase:nth-child(5){animation-delay:.25s} .phase:nth-child(6){animation-delay:.3s}
+  .phase:nth-child(7){animation-delay:.35s} .phase:nth-child(8){animation-delay:.4s}
+
+  .phase-header { display:flex; align-items:baseline; gap:14px; margin-bottom:16px; padding-bottom:10px; border-bottom:1px solid var(--border); }
+  .phase-number { font-family:'Cinzel',serif; font-size:10px; letter-spacing:0.3em; color:var(--gold); }
+  .phase-title { font-family:'Cinzel',serif; font-size:12px; letter-spacing:0.2em; color:var(--white); text-transform:uppercase; flex:1; }
+  .phase-total { font-family:'Cinzel',serif; font-size:11px; letter-spacing:0.12em; color:var(--silver-dim); }
+
+  /* ITEM */
+  .item {
+    display:grid;
+    grid-template-columns:32px 1fr;
+    gap:0 14px;
+    padding:14px 0;
+    border-bottom:1px solid rgba(42,42,42,0.5);
+    transition:background 0.2s, opacity 0.3s;
+    border-radius:4px;
+  }
+  .item:last-child { border-bottom:none; }
+  .item.purchased { opacity:0.5; }
+  .item.purchased .item-name { text-decoration:line-through; color:var(--silver-dim); }
+
+  /* CHECKBOX */
+  .item-check-wrap { padding-top:3px; display:flex; align-items:flex-start; justify-content:center; }
+  .item-check {
+    appearance:none; -webkit-appearance:none;
+    width:18px; height:18px;
+    border:1px solid var(--border);
+    border-radius:3px;
+    background:transparent;
+    cursor:pointer;
+    position:relative;
+    flex-shrink:0;
+    transition:border-color 0.2s, background 0.2s;
+  }
+  .item-check:checked { background:var(--green); border-color:var(--green); }
+  .item-check:checked::after {
+    content:'';
+    position:absolute; left:4px; top:1px;
+    width:6px; height:10px;
+    border:2px solid #fff;
+    border-top:none; border-left:none;
+    transform:rotate(45deg);
+  }
+
+  /* ITEM CONTENT */
+  .item-body { display:flex; flex-direction:column; gap:4px; }
+  .item-top-row { display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  .item-name { font-family:'EB Garamond',serif; font-size:16px; color:var(--white); transition:color 0.2s; flex:1; min-width:0; }
+  .item-price-display {
+    font-family:'Cinzel',serif; font-size:12px; letter-spacing:0.08em;
+    color:var(--gold); white-space:nowrap; cursor:pointer;
+    border-bottom:1px dashed transparent;
+    transition:border-color 0.2s;
+    flex-shrink:0;
+  }
+  .item-price-display:hover { border-bottom-color:var(--gold-dim); }
+  .item-price-display.is-owned { color:var(--green); }
+  .item-note { font-family:'EB Garamond',serif; font-style:italic; font-size:13px; color:var(--silver-dim); line-height:1.4; }
+
+  /* TAGS */
+  .item-tags { display:flex; gap:6px; flex-wrap:wrap; margin-top:2px; }
+  .item-tag { display:inline-block; font-family:'Cinzel',serif; font-size:9px; letter-spacing:0.18em; text-transform:uppercase; padding:2px 8px; border-radius:2px; }
+  .tag-priority { background:var(--red-dim); color:#c46060; border:1px solid rgba(139,32,32,0.4); }
+  .tag-deferred { background:rgba(184,149,42,0.1); color:var(--gold); border:1px solid rgba(184,149,42,0.3); }
+  .tag-owned { background:var(--green-dim); color:#6aaa6a; border:1px solid rgba(74,140,74,0.4); }
+
+  /* COMMENT */
+  .item-comment-wrap { margin-top:6px; }
+  .item-comment-text {
+    font-family:'EB Garamond',serif; font-size:13px; color:var(--gold);
+    background:var(--gold-faint); border:1px solid rgba(184,149,42,0.2);
+    border-radius:3px; padding:4px 10px;
+    cursor:pointer; display:inline-block;
+    transition:background 0.2s;
+  }
+  .item-comment-text:hover { background:rgba(184,149,42,0.12); }
+  .add-comment-btn {
+    font-family:'Cinzel',serif; font-size:9px; letter-spacing:0.2em; text-transform:uppercase;
+    color:var(--silver-dim); background:none; border:1px dashed var(--border);
+    border-radius:3px; padding:3px 10px; cursor:pointer;
+    transition:border-color 0.2s, color 0.2s;
+    margin-top:4px;
+  }
+  .add-comment-btn:hover { border-color:var(--gold-dim); color:var(--gold); }
+
+  /* MODAL */
+  .modal-overlay {
+    position:fixed; inset:0; background:rgba(0,0,0,0.85);
+    z-index:200; display:flex; align-items:center; justify-content:center;
+    padding:20px; opacity:0; pointer-events:none; transition:opacity 0.2s;
+  }
+  .modal-overlay.open { opacity:1; pointer-events:all; }
+  .modal {
+    background:var(--card); border:1px solid var(--border); border-top:1px solid var(--gold-dim);
+    padding:28px 24px; width:100%; max-width:480px; border-radius:4px;
+    transform:translateY(12px); transition:transform 0.2s;
+  }
+  .modal-overlay.open .modal { transform:translateY(0); }
+  .modal-title { font-family:'Cinzel',serif; font-size:11px; letter-spacing:0.3em; text-transform:uppercase; color:var(--gold); margin-bottom:4px; }
+  .modal-item-name { font-family:'EB Garamond',serif; font-size:18px; color:var(--white); margin-bottom:20px; }
+  .modal-label { font-family:'Cinzel',serif; font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--silver-dim); margin-bottom:6px; display:block; }
+  .modal-input {
+    width:100%; background:var(--dark); border:1px solid var(--border);
+    color:var(--white); font-family:'EB Garamond',serif; font-size:16px;
+    padding:10px 14px; border-radius:3px; outline:none;
+    transition:border-color 0.2s;
+    margin-bottom:16px;
+  }
+  .modal-input:focus { border-color:var(--gold-dim); }
+  .modal-textarea { resize:vertical; min-height:80px; }
+  .modal-actions { display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap; }
+  .btn {
+    font-family:'Cinzel',serif; font-size:10px; letter-spacing:0.2em; text-transform:uppercase;
+    padding:9px 18px; border-radius:3px; cursor:pointer; border:none; transition:background 0.2s;
+  }
+  .btn-cancel { background:var(--dark); color:var(--silver-dim); border:1px solid var(--border); }
+  .btn-save { background:var(--gold-dim); color:var(--white); }
+  .btn-save:hover { background:var(--gold); }
+  .btn-clear { background:var(--red-dim); color:#c46060; border:1px solid rgba(139,32,32,0.4); }
+
+  /* TOTALS */
+  .totals-section { margin-top:48px; animation:fadeUp 0.5s ease 0.45s both; }
+  .totals-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
+  @media(max-width:480px){ .totals-grid{ grid-template-columns:1fr; } }
+  .total-card { background:var(--card); border:1px solid var(--border); padding:18px 20px; border-radius:4px; }
+  .total-card-label { font-family:'Cinzel',serif; font-size:9px; letter-spacing:0.25em; text-transform:uppercase; color:var(--silver-dim); margin-bottom:6px; }
+  .total-card-amount { font-family:'Cinzel Decorative',serif; font-size:20px; color:var(--gold); letter-spacing:0.08em; }
+  .total-card-amount.spent { color:#6aaa6a; }
+  .grand-total-card { background:var(--card); border:1px solid var(--border); border-top:1px solid var(--gold-dim); padding:22px 24px; display:flex; justify-content:space-between; align-items:center; border-radius:4px; }
+  .gt-left {}
+  .gt-label { font-family:'Cinzel',serif; font-size:10px; letter-spacing:0.28em; text-transform:uppercase; color:var(--silver-dim); }
+  .gt-note { font-family:'EB Garamond',serif; font-style:italic; font-size:13px; color:var(--silver-dim); margin-top:3px; }
+  .gt-amount { font-family:'Cinzel Decorative',serif; font-size:24px; color:var(--gold); letter-spacing:0.1em; }
+
+  /* FOOTER */
+  .footnote { margin-top:32px; text-align:center; font-family:'EB Garamond',serif; font-style:italic; font-size:13px; color:var(--silver-dim); animation:fadeUp 0.5s ease 0.5s both; }
+
+  /* INSTALL BANNER */
+  .install-banner {
+    position:fixed; bottom:0; left:0; right:0;
+    background:var(--card); border-top:1px solid var(--gold-dim);
+    padding:14px 20px calc(14px + env(safe-area-inset-bottom));
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    z-index:150; transform:translateY(100%); transition:transform 0.3s;
+  }
+  .install-banner.show { transform:translateY(0); }
+  .install-text { font-family:'EB Garamond',serif; font-size:14px; color:var(--silver); }
+  .install-text strong { font-family:'Cinzel',serif; font-size:11px; letter-spacing:0.15em; color:var(--white); display:block; margin-bottom:2px; }
+  .install-btn { font-family:'Cinzel',serif; font-size:10px; letter-spacing:0.2em; text-transform:uppercase; background:var(--gold-dim); color:var(--white); border:none; padding:9px 16px; border-radius:3px; cursor:pointer; white-space:nowrap; }
+  .install-dismiss { background:none; border:none; color:var(--silver-dim); cursor:pointer; font-size:20px; padding:4px; line-height:1; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <header>
+    <div class="brand">Völund Watches</div>
+    <div class="divider"><div class="divider-line"></div><div class="divider-rune">⁕</div><div class="divider-line"></div></div>
+    <div class="subtitle">Workshop Build List</div>
+  </header>
+
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span class="progress-text">Items Acquired</span>
+      <span class="progress-pct" id="prog-pct">0%</span>
+    </div>
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#c46060"></div>Priority — Buy Now</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#b8952a"></div>Deferred — Month 6–12</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#6aaa6a"></div>Already Owned</div>
+  </div>
+
+  <div id="phases-container"></div>
+
+  <div class="totals-section">
+    <div class="totals-grid">
+      <div class="total-card">
+        <div class="total-card-label">Estimated Remaining (Phase I–VI)</div>
+        <div class="total-card-amount" id="total-remaining">—</div>
+      </div>
+      <div class="total-card">
+        <div class="total-card-label">Spent So Far</div>
+        <div class="total-card-amount spent" id="total-spent">$0 CAD</div>
+      </div>
+    </div>
+    <div class="grand-total-card">
+      <div class="gt-left">
+        <div class="gt-label">Phase I–VI Budget Estimate</div>
+        <div class="gt-note">Laser engraver funded separately from business revenue</div>
+      </div>
+      <div class="gt-amount">$780–$1,320 CAD</div>
+    </div>
+  </div>
+
+  <div class="footnote">Forged in patience. Built to last. — Völund Watches</div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-title">Edit Item</div>
+    <div class="modal-item-name" id="modal-item-name"></div>
+    <label class="modal-label">Actual Price Paid (CAD)</label>
+    <input class="modal-input" id="modal-price" type="text" placeholder="e.g. 45 or leave blank for estimate">
+    <label class="modal-label">Notes / Where You Got It</label>
+    <textarea class="modal-input modal-textarea" id="modal-comment" placeholder="e.g. FB Marketplace, great deal, need to pick up Saturday…"></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-clear" id="modal-clear">Clear</button>
+      <button class="btn btn-cancel" id="modal-cancel">Cancel</button>
+      <button class="btn btn-save" id="modal-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- INSTALL BANNER -->
+<div class="install-banner" id="install-banner">
+  <div class="install-text">
+    <strong>Install as App</strong>
+    Add to your home screen for offline access
+  </div>
+  <button class="install-btn" id="install-btn">Install</button>
+  <button class="install-dismiss" id="install-dismiss">×</button>
+</div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────────
+const PHASES = [
+  {
+    num:'I', title:'Workspace', total:'~$150–$270 CAD',
+    items:[
+      {id:'ws1', name:'Workbench or Solid Folding Table', note:'Minimum 2×4 ft surface. A used solid-core door on sawhorses works well.', tag:'priority', price:'$0–$110'},
+      {id:'ws2', name:'Daylight LED Task Light', note:'5000–6500K for accurate colour rendering on dials. Essential for finish work.', tag:'priority', price:'$40–$80'},
+      {id:'ws3', name:'Portable Spray Booth', note:'Collapsible with built-in exhaust fan and filter. Folds flat when not in use.', tag:'priority', price:'$65–$135'},
+      {id:'ws4', name:'Pegboard + Wall Shelving', note:'Reclaim vertical space in the garage. Keeps the bench clear.', tag:'priority', price:'$55–$110'},
+    ]
+  },
+  {
+    num:'II', title:'Airbrush Setup', total:'~$200–$340 CAD',
+    items:[
+      {id:'ab1', name:'Dual-Action Airbrush', note:'Iwata Neo CN or Badger Patriot 105. Dual-action gives you simultaneous flow and pressure control.', tag:'priority', price:'$65–$120'},
+      {id:'ab2', name:'Compressor with Tank + Regulator', note:'Tank smooths out pressure spikes. Regulator lets you dial in PSI precisely. A must for dial-scale work.', tag:'priority', price:'$95–$165'},
+      {id:'ab3', name:'Air Hose', note:'Usually included with compressor. Braided is better than coiled for workbench use.', tag:'priority', price:'$14–$28'},
+      {id:'ab4', name:'Airbrush Cleaning Pot', note:'Glass jar with lid and brush holder. Lets you purge the brush safely without spraying solvent into the air.', tag:'priority', price:'$20–$34'},
+    ]
+  },
+  {
+    num:'III', title:'Paints & Surface Prep', total:'~$80–$160 CAD',
+    items:[
+      {id:'pt1', name:'Lacquer-Based Airbrush Paint — Matte White', note:'Mr. Hobby or Tamiya lacquer are excellent. Thin with lacquer thinner to skim-milk consistency.', tag:'priority', price:'$20–$34'},
+      {id:'pt2', name:'Artist Gesso — Golden or Liquitex', note:'Acrylic primer and texture base. Stipple with a stiff brush for the cold stone matte effect.', tag:'priority', price:'$20–$28'},
+      {id:'pt3', name:'Rust-Oleum Texture Spray — Matte White', note:'Alternative or complement to gesso. Sprays on a consistent stone texture. Test on scrap first.', tag:'priority', price:'$16–$25'},
+      {id:'pt4', name:'Matte Varnish / Sealer', note:'Locks in texture and markings without adding gloss. Testors Dullcote is a trusted choice.', tag:'priority', price:'$14–$22'},
+      {id:'pt5', name:'Lacquer Thinner', note:'For thinning paint to airbrush viscosity and cleaning the airbrush after lacquer use.', tag:'priority', price:'$14–$22'},
+    ]
+  },
+  {
+    num:'IV', title:'Detail & Application', total:'~$55–$95 CAD',
+    items:[
+      {id:'dt1', name:'Fine Detail Brushes — Size 0 and 000', note:'For text, indices, and touch-ups. Kolinsky sable holds a finer tip than synthetic.', tag:'priority', price:'$14–$28'},
+      {id:'dt2', name:'Posca or Molotow Paint Pens — Black & White', note:'Excellent for fine dial markings and text at small scale. Opaque and consistent flow.', tag:'priority', price:'$14–$22'},
+      {id:'dt3', name:'Tamiya Masking Tape', note:'Low-tack, paper-based. Pulls off cleanly without lifting paint. Essential for clean edges.', tag:'priority', price:'$11–$17'},
+      {id:'dt4', name:'Dial Holder / Dial Dots / Helping Hands', note:'Hold dials without touching them while painting or drying. Dial dots are adhesive stickers that lift off cleanly.', tag:'priority', price:'$14–$22'},
+      {id:'dt5', name:'Small Lazy Susan Turntable', note:'Rotate the dial while airbrushing for even coverage without touching the surface.', tag:'priority', price:'$14–$22'},
+    ]
+  },
+  {
+    num:'V', title:'Safety', total:'~$70–$125 CAD',
+    items:[
+      {id:'sf1', name:'Half-Face Respirator — Organic Vapour Rated', note:'Not optional with lacquers. 3M 6500 series with OV/P100 cartridges. A dust mask does not cut it.', tag:'priority', price:'$40–$70'},
+      {id:'sf2', name:'Nitrile Gloves — Box of 100', note:'Keep skin oils off dials and keep solvents off your hands.', tag:'priority', price:'$16–$28'},
+      {id:'sf3', name:'Safety Glasses', note:'For airbrush and solvent work. Wrap-around style preferred.', tag:'priority', price:'$11–$22'},
+      {id:'sf4', name:'Box Fan for Ventilation', note:'Direct airflow out of the garage when using lacquers, even with the spray booth.', tag:'priority', price:'$35–$55'},
+    ]
+  },
+  {
+    num:'VI', title:'Watchmaking Tools', total:'~$110–$205 CAD',
+    items:[
+      {id:'wt1', name:'Precision Tweezers Set', note:'Anti-magnetic, fine-tip. At minimum a #3 and #5. Essential for handling dials, indices, and hands.', tag:'priority', price:'$22–$42'},
+      {id:'wt2', name:'Case Back Opener (Knife + Wrench)', note:'A case knife for snap-backs and an adjustable wrench for screw-backs. Buy decent quality — cheap ones slip and scar cases.', tag:'priority', price:'$28–$55'},
+      {id:'wt3', name:'Hand Presser & Removal Tool', note:'For seating and removing watch hands without damaging the dial surface.', tag:'priority', price:'$28–$55'},
+      {id:'wt4', name:'Spring Bar Tool', note:'For strap and bracelet changes. A basic one works fine — you likely already have this.', tag:'owned', price:'$7–$22'},
+      {id:'wt5', name:"Watchmaker's Loupe — 5× or 10×", note:'For inspecting dial finish, alignment, and dust before final assembly. Essential for QC.', tag:'priority', price:'$22–$42'},
+      {id:'wt6', name:'Rodico Putty', note:"The watchmaker's magic eraser. Picks up dust, fingerprints, and particles from dials and crystals without scratching.", tag:'priority', price:'$11–$17'},
+    ]
+  },
+  {
+    num:'VII', title:'Laser Engraver — Month 6–12', total:'~$1,100–$1,800 CAD',
+    items:[
+      {id:'ls1', name:'xTool F2 (5W IR + 15W Diode)', note:'Dual laser — 5W infrared for metals and 15W diode for leather, wood, and non-metals. Built-in 50MP camera, 6,000 mm/s. The right balance of capability and price for Völund.', tag:'deferred', price:'~$1,100–$1,400'},
+      {id:'ls2', name:'Rotary Attachment', note:'For engraving cylindrical surfaces — case sides, crowns, casebacks. xTool RA2 Pro recommended.', tag:'deferred', price:'$80–$140'},
+      {id:'ls3', name:'Fume Extractor — Laser-Specific', note:'Enclosed lasers have built-in filtration but an external extractor is recommended for metal engraving fumes. Non-negotiable in a garage.', tag:'deferred', price:'$110–$200'},
+    ]
+  },
+  {
+    num:'VIII', title:'Already in Your Arsenal', total:'—',
+    items:[
+      {id:'ow1', name:'Creality K1 Max — 3D Printer', note:'For printing dial jigs, case prototypes, tooling fixtures, and photography props.', tag:'owned', price:'✓'},
+      {id:'ow2', name:'Fusion 360', note:'Dial design, case modelling, index layout, and laser-ready vector export.', tag:'owned', price:'✓'},
+      {id:'ow3', name:'Adobe Photoshop', note:'Dial artwork, brand photography editing, logo refinement.', tag:'owned', price:'✓'},
+      {id:'ow4', name:'Adobe After Effects & Maya', note:'Product animation, brand video content, and eventual watch reveal reels.', tag:'owned', price:'✓'},
+    ]
+  }
+];
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'volund_workshop_v2';
+let state = {};
+
+function loadState() {
+  try { state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch(e) { state = {}; }
+}
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  catch(e) {}
+}
+function getItem(id) {
+  return state[id] || { purchased: false, price: null, comment: '' };
+}
+function setItem(id, data) {
+  state[id] = { ...getItem(id), ...data };
+  saveState();
+}
+
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+function tagClass(tag) {
+  return tag === 'priority' ? 'tag-priority' : tag === 'deferred' ? 'tag-deferred' : 'tag-owned';
+}
+function tagLabel(tag) {
+  return tag === 'priority' ? 'Priority' : tag === 'deferred' ? 'Deferred' : 'Owned';
+}
+
+function renderPhases() {
+  const container = document.getElementById('phases-container');
+  container.innerHTML = '';
+  PHASES.forEach(phase => {
+    const div = document.createElement('div');
+    div.className = 'phase';
+    div.innerHTML = `
+      <div class="phase-header">
+        <span class="phase-number">${phase.num}</span>
+        <span class="phase-title">${phase.title}</span>
+        <span class="phase-total">${phase.total}</span>
+      </div>
+      ${phase.items.map(item => renderItem(item)).join('')}
+    `;
+    container.appendChild(div);
+  });
+  bindEvents();
+}
+
+function renderItem(item) {
+  const s = getItem(item.id);
+  const isOwned = item.tag === 'owned';
+  const displayPrice = s.price ? `$${s.price} CAD` : item.price;
+  const priceClass = isOwned ? 'item-price-display is-owned' : 'item-price-display';
+  const commentHtml = s.comment
+    ? `<div class="item-comment-wrap"><span class="item-comment-text" data-edit="${item.id}">💬 ${s.comment}</span></div>`
+    : `<div class="item-comment-wrap"><button class="add-comment-btn" data-edit="${item.id}">+ Add note / actual price</button></div>`;
+  return `
+    <div class="item ${s.purchased ? 'purchased' : ''}" id="item-${item.id}">
+      <div class="item-check-wrap">
+        <input type="checkbox" class="item-check" data-id="${item.id}" ${s.purchased ? 'checked' : ''}>
+      </div>
+      <div class="item-body">
+        <div class="item-top-row">
+          <div class="item-name">${item.name}</div>
+          <div class="${priceClass}" data-edit="${item.id}">${displayPrice}</div>
+        </div>
+        <div class="item-note">${item.note}</div>
+        <div class="item-tags"><span class="item-tag ${tagClass(item.tag)}">${tagLabel(item.tag)}</span></div>
+        ${commentHtml}
+      </div>
+    </div>`;
+}
+
+function refreshItem(itemId) {
+  const allItems = PHASES.flatMap(p => p.items);
+  const item = allItems.find(i => i.id === itemId);
+  if (!item) return;
+  const el = document.getElementById(`item-${itemId}`);
+  if (!el) return;
+  const s = getItem(item.id);
+  const isOwned = item.tag === 'owned';
+  const displayPrice = s.price ? `$${s.price} CAD` : item.price;
+  const priceClass = isOwned ? 'item-price-display is-owned' : 'item-price-display';
+  const commentHtml = s.comment
+    ? `<div class="item-comment-wrap"><span class="item-comment-text" data-edit="${item.id}">💬 ${s.comment}</span></div>`
+    : `<div class="item-comment-wrap"><button class="add-comment-btn" data-edit="${item.id}">+ Add note / actual price</button></div>`;
+  el.className = `item ${s.purchased ? 'purchased' : ''}`;
+  el.querySelector('.item-check').checked = s.purchased;
+  el.querySelector('.item-name').textContent = item.name;
+  el.querySelector('.item-price-display').className = priceClass;
+  el.querySelector('.item-price-display').textContent = displayPrice;
+  el.querySelector('.item-note').textContent = item.note;
+  el.querySelector('.item-comment-wrap').outerHTML; // swap
+  const bodyEl = el.querySelector('.item-body');
+  const oldComment = bodyEl.querySelector('.item-comment-wrap');
+  const tmp = document.createElement('div');
+  tmp.innerHTML = commentHtml;
+  bodyEl.replaceChild(tmp.firstElementChild, oldComment);
+  bindEvents();
+}
+
+function bindEvents() {
+  // Delegated — single persistent listener on the container, never expires
+  const container = document.getElementById('phases-container');
+  if (!container._bound) {
+    container._bound = true;
+    container.addEventListener('change', e => {
+      if (!e.target.classList.contains('item-check')) return;
+      const id = e.target.dataset.id;
+      setItem(id, { purchased: e.target.checked });
+      document.getElementById(`item-${id}`).classList.toggle('purchased', e.target.checked);
+      updateTotals();
+    });
+    container.addEventListener('click', e => {
+      const el = e.target.closest('[data-edit]');
+      if (!el) return;
+      openModal(el.dataset.edit);
+    });
+  }
+}
+
+// ─── MODAL ───────────────────────────────────────────────────────────────────
+let currentEditId = null;
+function openModal(id) {
+  currentEditId = id;
+  const allItems = PHASES.flatMap(p => p.items);
+  const item = allItems.find(i => i.id === id);
+  const s = getItem(id);
+  document.getElementById('modal-item-name').textContent = item.name;
+  document.getElementById('modal-price').value = s.price || '';
+  document.getElementById('modal-comment').value = s.comment || '';
+  document.getElementById('modal').classList.add('open');
+  document.getElementById('modal-price').focus();
+}
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  currentEditId = null;
+}
+document.getElementById('modal-cancel').addEventListener('click', closeModal);
+document.getElementById('modal').addEventListener('click', e => { if(e.target === document.getElementById('modal')) closeModal(); });
+document.getElementById('modal-save').addEventListener('click', () => {
+  if (!currentEditId) return;
+  const price = document.getElementById('modal-price').value.trim();
+  const comment = document.getElementById('modal-comment').value.trim();
+  setItem(currentEditId, { price: price || null, comment });
+  refreshItem(currentEditId);
+  updateTotals();
+  closeModal();
+});
+document.getElementById('modal-clear').addEventListener('click', () => {
+  document.getElementById('modal-price').value = '';
+  document.getElementById('modal-comment').value = '';
+});
+
+// ─── TOTALS ───────────────────────────────────────────────────────────────────
+function updateTotals() {
+  const phaseItoVI = PHASES.slice(0,6).flatMap(p => p.items);
+  let spent = 0;
+  let purchasedCount = 0;
+  let totalItems = 0;
+  PHASES.forEach(phase => phase.items.forEach(item => {
+    totalItems++;
+    const s = getItem(item.id);
+    if (s.purchased) {
+      purchasedCount++;
+      if (s.price) spent += parseFloat(s.price.replace(/[^0-9.]/g,'')) || 0;
+    }
+  }));
+  const pct = totalItems ? Math.round((purchasedCount / totalItems) * 100) : 0;
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('total-spent').textContent = spent > 0 ? `$${spent.toFixed(0)} CAD` : '$0 CAD';
+  // Remaining estimate (midpoint of ranges for unpurchased phase I–VI items)
+  const ranges = {
+    ws1:[0,110],ws2:[40,80],ws3:[65,135],ws4:[55,110],
+    ab1:[65,120],ab2:[95,165],ab3:[14,28],ab4:[20,34],
+    pt1:[20,34],pt2:[20,28],pt3:[16,25],pt4:[14,22],pt5:[14,22],
+    dt1:[14,28],dt2:[14,22],dt3:[11,17],dt4:[14,22],dt5:[14,22],
+    sf1:[40,70],sf2:[16,28],sf3:[11,22],sf4:[35,55],
+    wt1:[22,42],wt2:[28,55],wt3:[28,55],wt4:[7,22],wt5:[22,42],wt6:[11,17]
+  };
+  let remLow = 0, remHigh = 0;
+  phaseItoVI.forEach(item => {
+    const s = getItem(item.id);
+    if (!s.purchased && ranges[item.id]) {
+      remLow += ranges[item.id][0];
+      remHigh += ranges[item.id][1];
+    }
+  });
+  document.getElementById('total-remaining').textContent = remLow === 0 && remHigh === 0
+    ? '✓ Complete' : `$${remLow}–$${remHigh} CAD`;
+}
+
+// ─── PWA: MANIFEST (inline) ───────────────────────────────────────────────────
+const manifest = {
+  name: "Völund Workshop",
+  short_name: "Völund",
+  description: "Workshop equipment build list for Völund Watches",
+  start_url: "./",
+  display: "standalone",
+  background_color: "#0a0a0a",
+  theme_color: "#0a0a0a",
+  orientation: "portrait-primary",
+  icons: [
+    {
+      src: "data:image/svg+xml," + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' fill='%230a0a0a'/><text x='96' y='130' font-size='120' text-anchor='middle' fill='%23b8952a' font-family='serif'>V</text></svg>`),
+      sizes: "192x192",
+      type: "image/svg+xml",
+      purpose: "any maskable"
+    }
+  ]
+};
+const manifestBlob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+const manifestURL = URL.createObjectURL(manifestBlob);
+document.getElementById('manifest-placeholder').href = manifestURL;
+
+// ─── PWA: SERVICE WORKER (inline) ─────────────────────────────────────────────
+const swCode = `
+const CACHE = 'volund-v1';
+const URLS = [self.location.pathname];
+self.addEventListener('install', e => {
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(URLS)).then(() => self.skipWaiting()));
+});
+self.addEventListener('activate', e => {
+  e.waitUntil(clients.claim());
+});
+self.addEventListener('fetch', e => {
+  e.respondWith(caches.match(e.request).then(r => r || fetch(e.request).catch(() => caches.match(e.request))));
+});
+`;
+if ('serviceWorker' in navigator) {
+  const swBlob = new Blob([swCode], {type:'application/javascript'});
+  const swURL = URL.createObjectURL(swBlob);
+  navigator.serviceWorker.register(swURL, {scope: './'}).catch(() => {});
+}
+
+// ─── PWA: INSTALL PROMPT ──────────────────────────────────────────────────────
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  if (!localStorage.getItem('volund_install_dismissed')) {
+    document.getElementById('install-banner').classList.add('show');
+  }
+});
+document.getElementById('install-btn').addEventListener('click', () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => {
+      deferredPrompt = null;
+      document.getElementById('install-banner').classList.remove('show');
+    });
+  }
+});
+document.getElementById('install-dismiss').addEventListener('click', () => {
+  localStorage.setItem('volund_install_dismissed','1');
+  document.getElementById('install-banner').classList.remove('show');
+});
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+loadState();
+renderPhases();
+updateTotals();
+</script>
+</body>
+</html>
